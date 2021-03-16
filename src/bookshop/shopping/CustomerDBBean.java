@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -23,6 +25,46 @@ public class CustomerDBBean {
 		return ds.getConnection();
 	}
 	
+	public List<CustomerDataBean> selectMember() throws Exception{
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		CustomerDataBean member = null;
+		List<CustomerDataBean> memberList = null;
+		try {
+			conn = getConnection();
+			String sql = "select * from member";
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				memberList = new ArrayList<CustomerDataBean>();
+				do {
+				member = new CustomerDataBean();
+				
+				member.setId(rs.getString("id"));
+				member.setPasswd(rs.getString("passwd"));
+				member.setName(rs.getString("name"));
+				member.setReg_date(rs.getTimestamp("reg_date"));
+				member.setAddress(rs.getString("address"));
+				member.setTel(rs.getString("tel"));
+				
+				memberList.add(member);
+				}while(rs.next());
+			}	
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
+		if (rs != null) 
+				try { rs.close(); } catch(SQLException ex) {}
+         if (pstmt != null) 
+            	try { pstmt.close(); } catch(SQLException ex) {}
+         if (conn != null) 
+            	try { conn.close(); } catch(SQLException ex) {}
+
+		}
+		return memberList;
+	}
 	//회원가입
 	public void insertMember(CustomerDataBean member) throws Exception{
 		Connection conn = null;
